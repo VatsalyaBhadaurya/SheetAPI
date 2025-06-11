@@ -1,5 +1,54 @@
 # 🚀 SheetAPI Setup Guide
 
+## Prerequisites
+- Node.js (v14 or higher)
+- npm or yarn
+- Google Cloud Platform account
+- Google Sheets API enabled
+
+## Environment Setup
+
+1. Create a `.env` file in the root directory with the following variables:
+```env
+# Google OAuth Credentials
+GOOGLE_CLIENT_ID=your-client-id-here
+GOOGLE_CLIENT_SECRET=your-client-secret-here
+
+# Google Sheets API Key
+GOOGLE_API_KEY=your-api-key-here
+
+# Server Configuration
+PORT=3000
+SESSION_SECRET=your-session-secret-here
+```
+
+2. Install dependencies:
+```bash
+npm install
+```
+
+3. Start the server:
+```bash
+npm start
+```
+
+## Google Cloud Platform Setup
+
+1. Go to the [Google Cloud Console](https://console.cloud.google.com)
+2. Create a new project or select an existing one
+3. Enable the Google Sheets API
+4. Create OAuth 2.0 credentials
+5. Add authorized redirect URIs:
+   - http://localhost:3000/auth/google/callback
+6. Copy the client ID and client secret to your `.env` file
+
+## Security Notes
+
+- Never commit the `.env` file to version control
+- Keep your API keys and credentials secure
+- Use environment variables for all sensitive data
+- Regularly rotate your API keys and credentials
+
 Great! I can see you've added your Google OAuth2 credentials. Here's what you need to do next:
 
 ## ✅ What's Already Done
@@ -106,15 +155,6 @@ Here are some public Google Sheets you can test with:
 
 ### "CORS Error"
 - **Solution**: Make sure you're accessing via `http://localhost:8080` (not file://)
-
-## 🔐 Security Notes
-
-⚠️ **Important**: Your client secret is visible in the JSON file. For production:
-
-1. Move secrets to environment variables
-2. Use server-side OAuth flow
-3. Restrict API key usage
-4. Add proper domain restrictions
 
 ## 🎯 Next Steps
 

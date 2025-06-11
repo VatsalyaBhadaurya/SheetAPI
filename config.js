@@ -1,3 +1,6 @@
+// Load environment variables
+require('dotenv').config();
+
 // Configuration file for SheetAPI
 let credentials = null;
 
@@ -10,26 +13,25 @@ try {
 
 const config = {
     // Server Configuration
-    port: process.env.PORT || 3000,
-    nodeEnv: process.env.NODE_ENV || 'development',
+    server: {
+        port: process.env.PORT || 3000,
+        sessionSecret: process.env.SESSION_SECRET || 'your-session-secret'
+    },
     
-    // Google OAuth2 Configuration
+    // Google OAuth Configuration
     google: {
-        clientId: credentials?.web?.client_id || '344168920273-oo5bue2eo1j1trt6jhj7thp5tl5fu4jq.apps.googleusercontent.com',
-        clientSecret: credentials?.web?.client_secret || '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',
-        projectId: credentials?.web?.project_id || 'sheetapi-462416',
-        redirectUris: credentials?.web?.redirect_uris || ['http://localhost:3000/oauth2callback'],
-        javascriptOrigins: credentials?.web?.javascript_origins || ['http://localhost:3000'],
-        
-        // Google API Key for accessing Sheets API
-        apiKey: process.env.GOOGLE_API_KEY || 'AIzaSyA7IiI5q_koGFSa_2LFG5zH2FJrbmHGnPY',
-        
-        // OAuth2 scopes needed for the application
+        clientId: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        redirectUri: 'http://localhost:3000/auth/google/callback',
         scopes: [
             'https://www.googleapis.com/auth/spreadsheets.readonly',
-            'https://www.googleapis.com/auth/userinfo.profile',
-            'https://www.googleapis.com/auth/userinfo.email'
+            'https://www.googleapis.com/auth/drive.readonly'
         ]
+    },
+    
+    // Google Sheets API Configuration
+    sheets: {
+        apiKey: process.env.GOOGLE_API_KEY
     },
     
     // Database Configuration

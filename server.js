@@ -318,7 +318,11 @@ app.get('/api/sheets/:spreadsheetId', async (req, res) => {
             }
         }
 
-        const API_KEY = 'AIzaSyA7IiI5q_koGFSa_2LFG5zH2FJrbmHGnPY'; // Your Google API key
+        const API_KEY = process.env.GOOGLE_API_KEY;
+        if (!API_KEY) {
+            throw new Error('Google API key not configured');
+        }
+
         const sheetRange = range || `${sheet}!A:Z`;
         const url = `https://sheets.googleapis.com/v4/spreadsheets/${extractedId}/values/${sheetRange}?key=${API_KEY}`;
 
