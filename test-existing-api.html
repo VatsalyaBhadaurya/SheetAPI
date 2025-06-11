@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Existing API</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+        .info-box {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-left: 4px solid #007bff;
+        }
+        .error { border-left-color: #dc3545; background: #f8d7da; }
+        .success { border-left-color: #28a745; background: #d4edda; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            margin: 8px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        code {
+            background: #e9ecef;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: 'Monaco', monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Fix Your Existing API</h1>
+    
+    <div class="info-box error">
+        <h3>❌ Problem:</h3>
+        <p>Your API URL <code>/demo-api/pxwxntdwy9ifrxkwi1ia</code> doesn't work because the routing format has changed.</p>
+    </div>
+
+    <div class="info-box success">
+        <h3>✅ Solution:</h3>
+        <p>Use the new URL format with query parameters:</p>
+        <code>http://localhost:8080/demo-api/?id=pxwxntdwy9ifrxkwi1ia</code>
+    </div>
+
+    <div class="info-box">
+        <h3>🧪 Test Your API:</h3>
+        <p>Enter your API ID to test if it works with the new format:</p>
+        <input type="text" id="api-id" value="pxwxntdwy9ifrxkwi1ia" placeholder="Enter your API ID">
+        <br>
+        <button onclick="testAPI()">Test API</button>
+        <button onclick="openAPI()">Open API in New Tab</button>
+        
+        <div id="result"></div>
+    </div>
+
+    <div class="info-box">
+        <h3>📋 Updated URLs:</h3>
+        <p><strong>Old (Broken):</strong> <code>http://localhost:8080/demo-api/pxwxntdwy9ifrxkwi1ia</code></p>
+        <p><strong>New (Working):</strong> <code>http://localhost:8080/demo-api/?id=pxwxntdwy9ifrxkwi1ia</code></p>
+        
+        <h4>Usage Examples:</h4>
+        <pre>
+# Get all data
+curl "http://localhost:8080/demo-api/?id=pxwxntdwy9ifrxkwi1ia"
+
+# Filter data (if filters enabled)
+curl "http://localhost:8080/demo-api/?id=pxwxntdwy9ifrxkwi1ia&Name=John"
+
+# Pagination (if pagination enabled)  
+curl "http://localhost:8080/demo-api/?id=pxwxntdwy9ifrxkwi1ia&limit=10&offset=0"
+        </pre>
+    </div>
+
+    <script>
+        function testAPI() {
+            const apiId = document.getElementById('api-id').value.trim();
+            const resultDiv = document.getElementById('result');
+            
+            if (!apiId) {
+                resultDiv.innerHTML = '<p style="color: red;">Please enter an API ID</p>';
+                return;
+            }
+            
+            resultDiv.innerHTML = '<p>Testing API...</p>';
+            
+            // Check if API configuration exists
+            const configData = localStorage.getItem(`demo_api_${apiId}`);
+            if (configData) {
+                const config = JSON.parse(configData);
+                resultDiv.innerHTML = `
+                    <div style="background: #d4edda; padding: 10px; border-radius: 5px; margin-top: 10px;">
+                        <h4>✅ API Configuration Found!</h4>
+                        <p><strong>Name:</strong> ${config.apiName}</p>
+                        <p><strong>Sheet:</strong> ${config.spreadsheetTitle} → ${config.sheetName}</p>
+                        <p><strong>URL:</strong> <a href="/demo-api/?id=${apiId}" target="_blank">http://localhost:8080/demo-api/?id=${apiId}</a></p>
+                    </div>
+                `;
+            } else {
+                resultDiv.innerHTML = `
+                    <div style="background: #f8d7da; padding: 10px; border-radius: 5px; margin-top: 10px;">
+                        <h4>❌ API Configuration Not Found</h4>
+                        <p>The API configuration for ID <code>${apiId}</code> was not found in localStorage.</p>
+                        <p><strong>Solution:</strong> Create a new API using the main application:</p>
+                        <p><a href="index.html">Go to Main Application</a></p>
+                    </div>
+                `;
+            }
+        }
+        
+        function openAPI() {
+            const apiId = document.getElementById('api-id').value.trim();
+            if (apiId) {
+                window.open(`/demo-api/?id=${apiId}`, '_blank');
+            }
+        }
+        
+        // Test the default API ID on page load
+        window.onload = function() {
+            testAPI();
+        };
+    </script>
+</body>
+</html> 

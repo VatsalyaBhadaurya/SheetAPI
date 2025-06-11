@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Demo Test</title>
+    <style>
+        body { font-family: monospace; margin: 20px; line-height: 1.6; }
+        .test-section { background: #f0f0f0; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+        pre { background: #e0e0e0; padding: 10px; border-radius: 3px; overflow-x: auto; }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Quick Demo API Test</h1>
+    
+    <div class="test-section">
+        <h3>Step 1: Create Demo API</h3>
+        <button onclick="createDemo()">Create Demo API</button>
+        <div id="createResult"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Step 2: Test API Endpoints</h3>
+        <div id="apiDetails"></div>
+        <button onclick="testBrowser()" id="testBrowserBtn" disabled>Test in Browser (HTML)</button>
+        <button onclick="testJSON()" id="testJSONBtn" disabled>Test JSON Response</button>
+        <button onclick="testCurl()" id="testCurlBtn" disabled>Show curl Command</button>
+    </div>
+    
+    <div class="test-section">
+        <h3>Step 3: View Local Storage</h3>
+        <button onclick="showLocalStorage()">Show All Stored APIs</button>
+        <div id="storageResult"></div>
+    </div>
+
+    <script>
+        let currentDemoAPI = null;
+
+        function generateAPIId() {
+            return Math.random().toString(36).substring(2, 15) + 
+                   Math.random().toString(36).substring(2, 15);
+        }
+
+        async function createDemo() {
+            const resultDiv = document.getElementById('createResult');
+            resultDiv.innerHTML = '<div class="info">Creating demo API...</div>';
+            
+            try {
+                // Create a test API configuration with sample Google Sheets data
+                const apiId = generateAPIId();
+                const config = {
+                    spreadsheetId: '1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms', // Sample public sheet
+                    sheetName: 'Class Data',
+                    apiName: `Demo API ${apiId.substring(0, 8)}`,
+                    spreadsheetTitle: 'Student Sample Data',
+                    enableFilters: true,
+                    enablePagination: true,
+                    enableCaching: false,
+                    created: Date.now()
+                };
+
+                // Store the configuration in localStorage
+                localStorage.setItem(`demo_api_${apiId}`, JSON.stringify(config));
+                
+                // Create the endpoint URL
+                const endpoint = `http://localhost:8080/demo-api/index.html?id=${apiId}`;
+                
+                currentDemoAPI = { apiId, endpoint, config };
+                
+                resultDiv.innerHTML = `
+                    <div class="success">✅ Demo API Created Successfully!</div>
+                    <pre><strong>API ID:</strong> ${apiId}
+<strong>Endpoint:</strong> ${endpoint}
+<strong>Config:</strong> ${JSON.stringify(config, null, 2)}</pre>
+                `;
+                
+                // Enable test buttons
+                document.getElementById('testBrowserBtn').disabled = false;
+                document.getElementById('testJSONBtn').disabled = false;
+                document.getElementById('testCurlBtn').disabled = false;
+                
+                // Update API details
+                document.getElementById('apiDetails').innerHTML = `
+                    <p><strong>Current API ID:</strong> ${apiId}</p>
+                    <p><strong>Endpoint:</strong> <code>${endpoint}</code></p>
+                `;
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+            }
+        }
+
+        function testBrowser() {
+            if (currentDemoAPI) {
+                window.open(currentDemoAPI.endpoint, '_blank');
+            }
+        }
+
+        function testJSON() {
+            if (currentDemoAPI) {
+                const jsonUrl = currentDemoAPI.endpoint + '&format=json';
+                window.open(jsonUrl, '_blank');
+            }
+        }
+
+        function testCurl() {
+            if (currentDemoAPI) {
+                const curlCommand = `curl "${currentDemoAPI.endpoint}"`;
+                alert(`curl Command:\n\n${curlCommand}\n\nCopy this command and run it in your terminal.`);
+            }
+        }
+
+        function showLocalStorage() {
+            const resultDiv = document.getElementById('storageResult');
+            const apis = [];
+            
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith('demo_api_')) {
+                    const apiId = key.replace('demo_api_', '');
+                    const config = JSON.parse(localStorage.getItem(key));
+                    apis.push({ apiId, config });
+                }
+            }
+            
+            if (apis.length === 0) {
+                resultDiv.innerHTML = '<div class="info">No demo APIs found in localStorage.</div>';
+            } else {
+                let html = `<div class="success">Found ${apis.length} stored demo API(s):</div>`;
+                apis.forEach(api => {
+                    html += `
+                        <div style="background: white; padding: 10px; margin: 5px 0; border-radius: 3px;">
+                            <strong>ID:</strong> ${api.apiId}<br>
+                            <strong>Name:</strong> ${api.config.apiName}<br>
+                            <strong>Sheet:</strong> ${api.config.spreadsheetTitle}<br>
+                            <strong>Created:</strong> ${new Date(api.config.created).toLocaleString()}<br>
+                            <button onclick="testSpecificAPI('${api.apiId}')">Test This API</button>
+                        </div>
+                    `;
+                });
+                resultDiv.innerHTML = html;
+            }
+        }
+
+        function testSpecificAPI(apiId) {
+            const endpoint = `http://localhost:8080/demo-api/index.html?id=${apiId}`;
+            const jsonEndpoint = `${endpoint}&format=json`;
+            
+            if (confirm(`Test API ${apiId}?\n\nBrowser View: ${endpoint}\nJSON View: ${jsonEndpoint}\n\nClick OK for Browser, Cancel for JSON`)) {
+                window.open(endpoint, '_blank');
+            } else {
+                window.open(jsonEndpoint, '_blank');
+            }
+        }
+    </script>
+</body>
+</html> 

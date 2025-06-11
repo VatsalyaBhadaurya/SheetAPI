@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SheetAPI - Convert Google Sheets to REST APIs</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <span class="logo">📊</span>
+                <span class="brand-text">SheetAPI</span>
+            </div>
+            <div class="nav-menu">
+                <a href="api-dashboard.html" class="nav-link">📊 Dashboard</a>
+                <a href="json-viewer.html" class="nav-link">🎯 Data Viewer</a>
+                <a href="demo-api/" class="nav-link">🔍 API Explorer</a>
+                <a href="#features" class="nav-link">Features</a>
+                <button id="auth-btn" class="btn btn-primary">Sign In</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    Turn Your <span class="gradient-text">Google Sheets</span><br>
+                    Into Powerful <span class="gradient-text">REST APIs</span>
+                </h1>
+                <p class="hero-subtitle">
+                    Paste any Google Sheets URL and instantly get a live REST API endpoint. 
+                    No coding required, no setup needed. Just paste, configure, and go!
+                </p>
+
+                <!-- Quick Demo Section -->
+                <div class="quick-demo-card">
+                    <div class="demo-header">
+                        <h3>🚀 Try It Now - Instant Demo</h3>
+                        <p>Create a working API with sample data in one click!</p>
+                    </div>
+                    <div class="demo-actions">
+                        <button id="quick-demo-btn" class="btn btn-demo">
+                            <span class="btn-text">🧪 Create Demo API</span>
+                            <span class="btn-loading hidden">
+                                <span class="spinner"></span>
+                                Creating...
+                            </span>
+                        </button>
+                        <span class="demo-hint">No signup required • Works in 5 seconds</span>
+                    </div>
+                    <div class="demo-result hidden" id="demo-result">
+                        <div class="demo-success">
+                            <h4>✅ Demo API Created!</h4>
+                            <div class="demo-endpoint">
+                                <strong>🔗 Your API Endpoint:</strong>
+                                <div class="endpoint-copy">
+                                    <input type="text" id="demo-endpoint-url" readonly class="demo-endpoint-input">
+                                    <button id="copy-demo-endpoint" class="btn-copy">📋</button>
+                                </div>
+                            </div>
+                            <div class="demo-commands">
+                                <h5>💻 Test with curl:</h5>
+                                <pre id="demo-curl-command"></pre>
+                                <div class="demo-test-actions">
+                                    <button id="test-demo-browser" class="btn btn-small">🌐 Test in Browser</button>
+                                    <button id="test-demo-json" class="btn btn-small">📋 View JSON</button>
+                                    <button id="demo-pretty-view" class="btn btn-small">✨ Pretty View</button>
+                                    <button id="download-demo-docs" class="btn btn-small">📋 Download Docs</button>
+                                    <button id="download-demo-data" class="btn btn-small">💾 Download Data</button>
+                                    <button id="open-dashboard" class="btn btn-small">📊 Dashboard</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="or-divider">
+                    <span>OR</span>
+                </div>
+                
+                <!-- Main Converter Interface -->
+                <div class="converter-card">
+                    <div class="converter-step" id="step-1">
+                        <h3>🔗 Paste Your Google Sheets URL</h3>
+                        <div class="url-input-group">
+                            <input 
+                                type="url" 
+                                id="sheet-url" 
+                                placeholder="https://docs.google.com/spreadsheets/d/..."
+                                class="url-input"
+                            >
+                            <button id="analyze-btn" class="btn btn-primary">
+                                <span class="btn-text">Analyze Sheet</span>
+                                <span class="btn-loading hidden">
+                                    <span class="spinner"></span>
+                                    Analyzing...
+                                </span>
+                            </button>
+                        </div>
+                        <p class="help-text">
+                            Paste the URL of any public Google Sheet you want to convert
+                        </p>
+                    </div>
+
+                    <div class="converter-step hidden" id="step-2">
+                        <h3>📋 Sheet Information</h3>
+                        <div class="sheet-info">
+                            <div class="info-row">
+                                <span class="info-label">Title:</span>
+                                <span id="sheet-title" class="info-value">Loading...</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">ID:</span>
+                                <span id="sheet-id" class="info-value">Loading...</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Sheets:</span>
+                                <span id="sheet-count" class="info-value">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="converter-step hidden" id="step-3">
+                        <h3>⚙️ Configure Your API</h3>
+                        <div class="config-form">
+                            <div class="form-group">
+                                <label for="sheet-selector">Select Sheet Tab:</label>
+                                <select id="sheet-selector" class="form-select">
+                                    <option value="">Loading sheets...</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="api-name">API Name:</label>
+                                <input 
+                                    type="text" 
+                                    id="api-name" 
+                                    placeholder="My Awesome API"
+                                    class="form-input"
+                                >
+                            </div>
+
+                            <div class="form-row">
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="enable-filters" checked>
+                                    <label for="enable-filters">Enable Query Filters</label>
+                                </div>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="enable-pagination" checked>
+                                    <label for="enable-pagination">Enable Pagination</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="cache-duration">Cache Duration:</label>
+                                <select id="cache-duration" class="form-select">
+                                    <option value="0">No Cache</option>
+                                    <option value="300" selected>5 minutes</option>
+                                    <option value="900">15 minutes</option>
+                                    <option value="3600">1 hour</option>
+                                    <option value="86400">24 hours</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="converter-step hidden" id="step-4">
+                        <div class="action-buttons">
+                            <button id="create-api-btn" class="btn btn-success btn-large">
+                                <span class="btn-text">🚀 Create API</span>
+                                <span class="btn-loading hidden">
+                                    <span class="spinner"></span>
+                                    Creating API...
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Result Display -->
+                <div class="result-card hidden" id="result-section">
+                    <div class="result-header">
+                        <h3>✅ Your API is Ready!</h3>
+                        <div class="result-actions">
+                            <button id="copy-endpoint" class="btn btn-secondary">📋 Copy URL</button>
+                            <button id="test-api" class="btn btn-secondary">🧪 Test API</button>
+                            <button id="view-data" class="btn btn-secondary">📊 View Data</button>
+                            <button id="pretty-view" class="btn btn-secondary">✨ Pretty View</button>
+                            <button id="view-docs" class="btn btn-secondary">📚 View Docs</button>
+                            <button id="download-docs" class="btn btn-secondary">📋 Download Docs</button>
+                            <button id="download-data" class="btn btn-secondary">💾 Download Data</button>
+                        </div>
+                    </div>
+
+                    <div class="api-endpoint">
+                        <label>Your API Endpoint:</label>
+                        <div class="endpoint-display">
+                            <input type="text" id="api-endpoint-url" readonly class="endpoint-input">
+                            <span class="endpoint-status" id="endpoint-status">🟢 Live</span>
+                        </div>
+                    </div>
+
+                    <div class="usage-examples">
+                        <h4>Quick Usage Examples:</h4>
+                        <div class="example-tabs">
+                            <button class="tab-btn active" data-tab="curl">cURL</button>
+                            <button class="tab-btn" data-tab="javascript">JavaScript</button>
+                            <button class="tab-btn" data-tab="python">Python</button>
+                        </div>
+                        <div class="example-content">
+                            <pre id="example-code"><code></code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Error Display -->
+                <div class="error-card hidden" id="error-section">
+                    <div class="error-icon">⚠️</div>
+                    <div class="error-content">
+                        <h3>Oops! Something went wrong</h3>
+                        <p id="error-message">An unexpected error occurred.</p>
+                        <button id="retry-btn" class="btn btn-outline">Try Again</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="container">
+            <h2 class="section-title">Why Choose SheetAPI?</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Instant APIs</h3>
+                    <p>Convert any Google Sheet to a REST API in under 30 seconds. No server setup required.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔍</div>
+                    <h3>Smart Filtering</h3>
+                    <p>Built-in support for query parameters, pagination, sorting, and complex filtering.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🚀</div>
+                    <h3>High Performance</h3>
+                    <p>Cached responses, CDN delivery, and optimized queries for lightning-fast API responses.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🛡️</div>
+                    <h3>Secure & Reliable</h3>
+                    <p>OAuth2 authentication, rate limiting, and 99.9% uptime guarantee.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Real-time Analytics</h3>
+                    <p>Monitor API usage, response times, and error rates with detailed analytics.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔧</div>
+                    <h3>Developer Friendly</h3>
+                    <p>OpenAPI docs, SDKs, webhooks, and comprehensive API documentation.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Live Demo Section -->
+    <section class="demo">
+        <div class="container">
+            <h2 class="section-title">See It In Action</h2>
+            <div class="demo-container">
+                <div class="demo-input">
+                    <h3>Sample Google Sheet</h3>
+                    <div class="sheet-preview">
+                        <table class="sample-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Age</th>
+                                    <th>City</th>
+                                    <th>Occupation</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>John Doe</td><td>30</td><td>New York</td><td>Developer</td></tr>
+                                <tr><td>Jane Smith</td><td>25</td><td>San Francisco</td><td>Designer</td></tr>
+                                <tr><td>Bob Johnson</td><td>35</td><td>Chicago</td><td>Manager</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="demo-arrow">→</div>
+                <div class="demo-output">
+                    <h3>Generated API Response</h3>
+                    <div class="json-preview">
+                        <pre><code>{
+  "data": [
+    {
+      "Name": "John Doe",
+      "Age": "30",
+      "City": "New York",
+      "Occupation": "Developer"
+    },
+    {
+      "Name": "Jane Smith",
+      "Age": "25",
+      "City": "San Francisco",
+      "Occupation": "Designer"
+    }
+  ],
+  "count": 3,
+  "total": 3,
+  "cached": false,
+  "generated_at": "2024-01-15T10:30:00Z"
+}</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <span class="logo">📊</span>
+                    <span class="brand-text">SheetAPI</span>
+                    <p>Turn spreadsheets into APIs</p>
+                </div>
+                <div class="footer-links">
+                    <div class="link-group">
+                        <h4>Product</h4>
+                        <a href="#features">Features</a>
+                        <a href="#pricing">Pricing</a>
+                        <a href="#docs">Documentation</a>
+                    </div>
+                    <div class="link-group">
+                        <h4>Support</h4>
+                        <a href="#help">Help Center</a>
+                        <a href="#contact">Contact</a>
+                        <a href="#status">Status</a>
+                    </div>
+                    <div class="link-group">
+                        <h4>Legal</h4>
+                        <a href="#privacy">Privacy</a>
+                        <a href="#terms">Terms</a>
+                        <a href="#security">Security</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 SheetAPI. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="assets/js/app.js"></script>
+    <script src="assets/js/auth.js"></script>
+    <script src="assets/js/converter.js"></script>
+</body>
+</html> 

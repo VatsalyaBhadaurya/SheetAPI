@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo API Handler</title>
+</head>
+<body>
+    <h1>Demo API Handler</h1>
+    <p>This page handles demo API requests and returns actual Google Sheets data.</p>
+    
+    <script>
+        const API_KEY = 'AIzaSyA7IiI5q_koGFSa_2LFG5zH2FJrbmHGnPY';
+        
+        // Parse URL to get API ID
+        const urlParts = window.location.pathname.split('/');
+        const apiId = urlParts[urlParts.length - 1];
+        
+        if (apiId && apiId !== 'demo-api.html') {
+            handleAPIRequest(apiId);
+        }
+        
+        async function handleAPIRequest(apiId) {
+            try {
+                // Get the stored configuration for this API
+                const configData = localStorage.getItem(`demo_api_${apiId}`);
+                if (!configData) {
+                    throw new Error('API configuration not found');
+                }
+                
+                const config = JSON.parse(configData);
+                
+                // Get query parameters from URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const limit = parseInt(urlParams.get('limit')) || 100;
+                const offset = parseInt(urlParams.get('offset')) || 0;
+                
+                // Fetch data from Google Sheets
+                const range = `'${config.sheetName}'!A:Z`;
+                const response = await fetch(
+                    `https://sheets.googleapis.com/v4/spreadsheets/${config.spreadsheetId}/values/${range}?key=${API_KEY}`
+                );
+                
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch sheet data: ${response.statusText}`);
+                }
+                
+                const sheetData = await response.json();
+                
+                if (!sheetData.values || sheetData.values.length === 0) {
+                    throw new Error('No data found in the sheet');
+                }
+                
+                const headers = sheetData.values[0];
+                const rows = sheetData.values.slice(1);
+                
+                // Convert to objects
+                let data = rows.map(row => {
+                    const obj = {};
+                    headers.forEach((header, index) => {
+                        obj[header] = row[index] || '';
+                    });
+                    return obj;
+                });
+                
+                // Apply filtering if enabled
+                if (config.enableFilters) {
+                    urlParams.forEach((value, key) => {
+                        if (key !== 'limit' && key !== 'offset' && key !== 'page') {
+                            data = data.filter(item => {
+                                const itemValue = item[key];
+                                if (itemValue) {
+                                    return itemValue.toString().toLowerCase().includes(value.toLowerCase());
+                                }
+                                return false;
+                            });
+                        }
+                    });
+                }
+                
+                // Apply pagination
+                const total = data.length;
+                if (config.enablePagination) {
+                    data = data.slice(offset, offset + limit);
+                }
+                
+                // Return JSON response
+                const apiResponse = {
+                    data: data,
+                    count: data.length,
+                    total: total,
+                    offset: offset,
+                    limit: limit,
+                    sheet: config.sheetName,
+                    api_name: config.apiName,
+                    spreadsheet_title: config.spreadsheetTitle,
+                    generated_at: new Date().toISOString(),
+                    demo: true
+                };
+                
+                // Set response headers
+                document.body.innerHTML = `
+                    <h1>API Response</h1>
+                    <p><strong>Endpoint:</strong> <code>/demo-api/${apiId}</code></p>
+                    <p><strong>Sheet:</strong> ${config.spreadsheetTitle} - ${config.sheetName}</p>
+                    <pre>${JSON.stringify(apiResponse, null, 2)}</pre>
+                `;
+                
+                // If this is an API request (not browser), return JSON
+                if (window.location.search.includes('format=json') || 
+                    document.referrer.includes('api') ||
+                    navigator.userAgent.includes('curl') ||
+                    navigator.userAgent.includes('Postman')) {
+                    
+                    document.body.innerHTML = JSON.stringify(apiResponse, null, 2);
+                    document.body.style.fontFamily = 'monospace';
+                    document.body.style.whiteSpace = 'pre';
+                }
+                
+            } catch (error) {
+                const errorResponse = {
+                    error: error.message,
+                    api_id: apiId,
+                    timestamp: new Date().toISOString()
+                };
+                
+                document.body.innerHTML = `
+                    <h1>API Error</h1>
+                    <pre>${JSON.stringify(errorResponse, null, 2)}</pre>
+                `;
+            }
+        }
+    </script>
+</body>
+</html> 

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sheets to API Converter</title>
+    <link rel="stylesheet" href="styles/popup.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 Sheets to API</h1>
+            <p>Convert your Google Sheet into a live REST API</p>
+        </header>
+
+        <div id="loading" class="hidden">
+            <div class="spinner"></div>
+            <p>Processing...</p>
+        </div>
+
+        <div id="step1" class="step">
+            <h3>Step 1: Detect Sheet</h3>
+            <div id="sheet-info" class="hidden">
+                <div class="info-card">
+                    <strong>📋 Spreadsheet:</strong>
+                    <span id="sheet-title">Loading...</span>
+                </div>
+                <div class="info-card">
+                    <strong>🔗 ID:</strong>
+                    <span id="sheet-id">Loading...</span>
+                </div>
+            </div>
+            <button id="detect-sheet" class="btn btn-primary">
+                Detect Current Sheet
+            </button>
+            <div id="sheet-error" class="error hidden">
+                Please open a Google Sheets tab first
+            </div>
+        </div>
+
+        <div id="step2" class="step hidden">
+            <h3>Step 2: Select Sheet Tab</h3>
+            <select id="sheet-tabs" class="select-dropdown">
+                <option value="">Select a sheet tab...</option>
+            </select>
+            <div class="checkbox-group">
+                <label>
+                    <input type="checkbox" id="include-filters" checked>
+                    Include query parameter filters
+                </label>
+            </div>
+        </div>
+
+        <div id="step3" class="step hidden">
+            <h3>Step 3: Configure API</h3>
+            <div class="input-group">
+                <label for="api-name">API Project Name:</label>
+                <input type="text" id="api-name" placeholder="My Sheet API" class="input-field">
+            </div>
+            <div class="checkbox-group">
+                <label>
+                    <input type="checkbox" id="generate-docs" checked>
+                    Generate API Documentation
+                </label>
+            </div>
+        </div>
+
+        <div id="step4" class="step hidden">
+            <h3>Step 4: Deploy & Generate</h3>
+            <button id="create-api" class="btn btn-success">
+                🚀 Create API Endpoint
+            </button>
+        </div>
+
+        <div id="result" class="hidden">
+            <h3>✅ API Created Successfully!</h3>
+            <div class="result-card">
+                <h4>🔗 Your API Endpoint:</h4>
+                <div class="endpoint-url">
+                    <input type="text" id="api-endpoint" readonly class="input-field">
+                    <button id="copy-endpoint" class="btn btn-copy">📋</button>
+                </div>
+            </div>
+            
+            <div class="result-card">
+                <h4>📖 Usage Examples:</h4>
+                <div class="code-block">
+                    <code id="api-examples"></code>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button id="view-docs" class="btn btn-secondary">📚 View Docs</button>
+                <button id="test-api" class="btn btn-secondary">🧪 Test API</button>
+                <button id="reset" class="btn btn-outline">🔄 Create Another</button>
+            </div>
+        </div>
+
+        <div id="error" class="error hidden">
+            <p id="error-message"></p>
+        </div>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html> 

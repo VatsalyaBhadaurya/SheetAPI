@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Connection Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-button { padding: 10px 20px; margin: 10px; background: #4285f4; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .result { margin: 10px 0; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>API Connection Test</h1>
+    <p>Testing connectivity to the SheetAPI server running on port 3000.</p>
+    
+    <button class="test-button" onclick="testConnection()">Test /api/test</button>
+    <button class="test-button" onclick="testData()">Test /api/data</button>
+    <button class="test-button" onclick="testQuickDemo()">Test Quick Demo</button>
+    
+    <div id="results"></div>
+    
+    <script>
+        async function testConnection() {
+            const resultsDiv = document.getElementById('results');
+            
+            try {
+                console.log('Testing http://localhost:3000/api/test');
+                const response = await fetch('http://localhost:3000/api/test');
+                const data = await response.json();
+                
+                resultsDiv.innerHTML += `
+                    <div class="result success">
+                        <h3>✅ /api/test - SUCCESS</h3>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                resultsDiv.innerHTML += `
+                    <div class="result error">
+                        <h3>❌ /api/test - FAILED</h3>
+                        <p>Error: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        async function testData() {
+            const resultsDiv = document.getElementById('results');
+            
+            try {
+                console.log('Testing http://localhost:3000/api/data');
+                const response = await fetch('http://localhost:3000/api/data');
+                const data = await response.json();
+                
+                resultsDiv.innerHTML += `
+                    <div class="result success">
+                        <h3>✅ /api/data - SUCCESS</h3>
+                        <p>Records loaded: ${data.count || data.data?.length || 0}</p>
+                        <pre>${JSON.stringify(data, null, 2).substring(0, 500)}...</pre>
+                    </div>
+                `;
+            } catch (error) {
+                resultsDiv.innerHTML += `
+                    <div class="result error">
+                        <h3>❌ /api/data - FAILED</h3>
+                        <p>Error: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        async function testQuickDemo() {
+            const resultsDiv = document.getElementById('results');
+            
+            try {
+                // Test the quick demo creation logic
+                const apiId = generateAPIId();
+                const config = {
+                    spreadsheetId: '1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms',
+                    sheetName: 'Class Data',
+                    apiName: `Demo API ${apiId.substring(0, 8)}`,
+                    spreadsheetTitle: 'Student Sample Data',
+                    enableFilters: true,
+                    enablePagination: true,
+                    enableCaching: false,
+                    created: Date.now()
+                };
+                
+                localStorage.setItem(`demo_api_${apiId}`, JSON.stringify(config));
+                const endpoint = `http://localhost:3000/demo-api/index.html?id=${apiId}`;
+                
+                resultsDiv.innerHTML += `
+                    <div class="result success">
+                        <h3>✅ Quick Demo API Created</h3>
+                        <p><strong>API ID:</strong> ${apiId}</p>
+                        <p><strong>Endpoint:</strong> <a href="${endpoint}" target="_blank">${endpoint}</a></p>
+                        <p><strong>Config stored in localStorage</strong></p>
+                    </div>
+                `;
+            } catch (error) {
+                resultsDiv.innerHTML += `
+                    <div class="result error">
+                        <h3>❌ Quick Demo - FAILED</h3>
+                        <p>Error: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        function generateAPIId() {
+            return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        }
+        
+        // Auto-run tests on page load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                testConnection();
+                setTimeout(() => testData(), 1000);
+            }, 500);
+        });
+    </script>
+</body>
+</html> 

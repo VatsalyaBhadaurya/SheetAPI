@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON Data Viewer - SheetAPI</title>
+    <link rel="stylesheet" href="assets/css/json-viewer.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="background"></div>
+    
+    <nav>
+        <div class="nav-container">
+            <div class="logo">📊 SheetAPI - Data Viewer</div>
+            <div class="nav-buttons">
+                <a href="index.html" class="nav-btn">← Back to Converter</a>
+                <a href="api-dashboard.html" class="nav-btn">📊 Dashboard</a>
+                <button id="theme-toggle" class="nav-btn">🌙 Dark</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- API Selection Section -->
+        <div class="selection-section">
+            <h1>🎯 Select Your API Data</h1>
+            <p>Choose an API to view its data in a beautiful, interactive format</p>
+            
+            <div class="api-selector">
+                <select id="api-selector" class="api-select">
+                    <option value="">Select an API to view data...</option>
+                </select>
+                <button id="load-data-btn" class="btn btn-primary" disabled>
+                    <span class="btn-icon">🔍</span>
+                    Load Data
+                </button>
+            </div>
+
+            <div class="quick-actions">
+                <button id="create-api-btn" class="btn btn-outline">
+                    <span class="btn-icon">➕</span>
+                    Create New API
+                </button>
+                <button id="sample-data-btn" class="btn btn-outline">
+                    <span class="btn-icon">📊</span>
+                    Load Live Data
+                </button>
+                <button id="test-connection-btn" class="btn btn-outline">
+                    <span class="btn-icon">🔗</span>
+                    Test Connection
+                </button>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <div class="loading-section" id="loading-section" style="display: none;">
+            <div class="loading-spinner"></div>
+            <p>Loading your data...</p>
+        </div>
+
+        <!-- Data Display Section -->
+        <div class="data-section" id="data-section" style="display: none;">
+            <!-- Data Controls -->
+            <div class="data-controls">
+                <div class="data-info">
+                    <h2 id="data-title">Your Sheet Data</h2>
+                    <div class="data-meta">
+                        <span id="record-count" class="meta-badge">0 records</span>
+                        <span id="api-status" class="meta-badge status-live">🟢 Live</span>
+                        <span id="last-updated" class="meta-badge">Updated: Just now</span>
+                    </div>
+                </div>
+                
+                <div class="controls-group">
+                    <div class="search-box">
+                        <input type="text" id="search-input" placeholder="🔍 Search data..." class="search-input">
+                        <button id="clear-search" class="clear-btn" style="display: none;">✕</button>
+                    </div>
+                    
+                    <div class="view-controls">
+                        <button id="view-table" class="view-btn active" title="Table View">
+                            <span class="icon">📋</span>
+                        </button>
+                        <button id="view-json" class="view-btn" title="JSON View">
+                            <span class="icon">{ }</span>
+                        </button>
+                        <button id="view-cards" class="view-btn" title="Card View">
+                            <span class="icon">🎴</span>
+                        </button>
+                    </div>
+                    
+                    <div class="action-controls">
+                        <button id="refresh-data" class="btn btn-small">
+                            <span class="btn-icon">🔄</span>
+                            Refresh
+                        </button>
+                        <button id="export-data" class="btn btn-small">
+                            <span class="btn-icon">💾</span>
+                            Export
+                        </button>
+                        <button id="copy-data" class="btn btn-small">
+                            <span class="btn-icon">📋</span>
+                            Copy
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table View -->
+            <div class="data-display" id="table-view">
+                <div class="table-container">
+                    <table class="data-table" id="data-table">
+                        <thead id="table-header"></thead>
+                        <tbody id="table-body"></tbody>
+                    </table>
+                </div>
+                <div class="table-pagination">
+                    <div class="pagination-info">
+                        <span id="pagination-text">Showing 0 of 0 records</span>
+                    </div>
+                    <div class="pagination-controls">
+                        <button id="prev-page" class="pagination-btn" disabled>← Prev</button>
+                        <span id="page-numbers" class="page-numbers"></span>
+                        <button id="next-page" class="pagination-btn" disabled>Next →</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- JSON View -->
+            <div class="data-display" id="json-view" style="display: none;">
+                <div class="json-controls">
+                    <button id="expand-all" class="json-btn">Expand All</button>
+                    <button id="collapse-all" class="json-btn">Collapse All</button>
+                    <button id="format-json" class="json-btn">Format</button>
+                </div>
+                <div class="json-container">
+                    <pre id="json-content" class="json-viewer"></pre>
+                </div>
+            </div>
+
+            <!-- Card View -->
+            <div class="data-display" id="card-view" style="display: none;">
+                <div id="cards-container" class="cards-container"></div>
+                <div class="card-pagination">
+                    <button id="card-prev" class="pagination-btn" disabled>← Prev</button>
+                    <span id="card-pagination-text">Page 1 of 1</span>
+                    <button id="card-next" class="pagination-btn" disabled>Next →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="empty-state">
+            <div class="empty-icon">📊</div>
+            <h2>No Data Selected</h2>
+            <p>Select an API from the dropdown above to view its data in a beautiful format</p>
+            <div class="empty-actions">
+                <button onclick="window.location.href='index.html'" class="btn btn-primary">
+                    Create Your First API
+                </button>
+                <button id="demo-data-btn" class="btn btn-outline">
+                    Load Live Data
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Modal -->
+    <div class="modal" id="export-modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Export Data</h3>
+                <button class="modal-close" id="close-export-modal">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="export-options">
+                    <label class="export-option">
+                        <input type="radio" name="export-format" value="json" checked>
+                        <span class="option-label">
+                            <strong>JSON</strong>
+                            <small>Raw JSON data format</small>
+                        </span>
+                    </label>
+                    <label class="export-option">
+                        <input type="radio" name="export-format" value="csv">
+                        <span class="option-label">
+                            <strong>CSV</strong>
+                            <small>Comma-separated values</small>
+                        </span>
+                    </label>
+                    <label class="export-option">
+                        <input type="radio" name="export-format" value="excel">
+                        <span class="option-label">
+                            <strong>Excel</strong>
+                            <small>Microsoft Excel format</small>
+                        </span>
+                    </label>
+                </div>
+                <div class="export-settings">
+                    <label class="setting-item">
+                        <input type="checkbox" id="include-metadata" checked>
+                        Include metadata (count, timestamp, etc.)
+                    </label>
+                    <label class="setting-item">
+                        <input type="checkbox" id="filtered-only">
+                        Export filtered data only
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="cancel-export" class="btn btn-outline">Cancel</button>
+                <button id="confirm-export" class="btn btn-primary">
+                    <span class="btn-icon">💾</span>
+                    Export Data
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/json-viewer.js"></script>
+</body>
+</html> 
